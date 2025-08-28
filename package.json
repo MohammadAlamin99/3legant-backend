@@ -1,8 +1,10 @@
 {
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.0",
     "y": "^0.3.2"
   },
@@ -11,6 +13,6 @@
   },
   "scripts": {
     "start": "node index.js",
-     "dev": "nodemon index.js"
+    "dev": "nodemon index.js"
   }
 }

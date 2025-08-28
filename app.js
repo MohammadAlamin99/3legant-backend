@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 // Routing Implement
 app.use("/api/v1", router);
 app.use("*", (req, res) => {
-    res.status(404).json({ status: "fail", data: "Not Found" })
+    res.status(404).json({ status: "fail", data: "Not Found Request" })
 })
 
 module.exports = app;
