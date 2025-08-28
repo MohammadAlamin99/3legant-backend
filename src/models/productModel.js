@@ -5,11 +5,11 @@ const { Schema } = mongoose;
 // Variant Schema
 const variantSchema = new Schema(
     {
-        sku: { type: String, required: true, unique: true, trim: true },
+        sku: { type: String, required: true, trim: true },
         title: { type: String, required: true },
         options: {
             type: Map,
-            of: String, // e.g., { color: "Red", size: "XL" }
+            of: String, // flexible key-value
             default: {},
         },
         price: { type: Number, required: true },
@@ -28,9 +28,9 @@ const productSchema = new Schema(
         title: { type: String, required: true, trim: true },
         description: { type: String },
 
-        brandId: { type: Schema.Types.ObjectId, ref: "Brand" },
-        categoryIds: [{ type: Schema.Types.ObjectId, ref: "Category" }],
-        collectionIds: [{ type: Schema.Types.ObjectId, ref: "Collection" }],
+        brand: { type: Schema.Types.ObjectId, ref: "Brand" },
+        category: [{ type: Schema.Types.ObjectId, ref: "Category" }],
+        collections: [{ type: Schema.Types.ObjectId, ref: "Collection" }],
 
         images: [
             {
@@ -38,7 +38,7 @@ const productSchema = new Schema(
                 alt: { type: String },
             },
         ],
-        thumbnail: { type: String },
+        featureImage: { type: String },
 
         tags: [{ type: String, trim: true }],
 
@@ -78,11 +78,10 @@ const productSchema = new Schema(
 );
 
 // Indexes
-productSchema.index({ brandId: 1 });
-productSchema.index({ categoryIds: 1 });
-productSchema.index({ "variants.sku": 1 }, { unique: true });
+productSchema.index({ brand: 1 });
+productSchema.index({ category: 1 });
 productSchema.index({ title: "text", description: "text", tags: "text" });
 
-const Product = mongoose.model("Product", productSchema);
+const Product = mongoose.model("products", productSchema);
 
 module.exports = Product;
