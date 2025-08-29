@@ -44,7 +44,6 @@ exports.getProducts = async (req, res) => {
     }
 }
 
-
 // update product by id
 exports.updateProduct = async (req, res) => {
     try {
@@ -64,6 +63,7 @@ exports.updateProduct = async (req, res) => {
     }
 }
 
+// delete product
 exports.deleteProduct = async (req, res) => {
     try {
         let id = req.params.id;

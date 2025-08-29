@@ -12,6 +12,9 @@ router.delete("/products/:id", authorize(["admin"]), productController.deletePro
 
 // user routes
 router.post("/auth/register", userController.userRegistration);
+router.post("/auth/login", userController.userLogin);
+router.get("/auth/user/profile", authorize(["admin", "customer"]), userController.userProfile);
+router.post("/auth/user/profile", authorize(["admin", "customer"]), userController.updateUserProfile);
 
 
 module.exports = router;
