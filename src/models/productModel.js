@@ -55,8 +55,8 @@ const productSchema = new Schema(
 
         status: {
             type: String,
-            enum: ["draft", "active", "archived"],
-            default: "draft",
+            enum: ["draft", "active"],
+            default: "active",
         },
 
         isTaxable: { type: Boolean, default: true },
