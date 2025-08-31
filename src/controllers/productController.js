@@ -24,9 +24,10 @@ exports.getProducts = async (req, res) => {
         const limit = parseInt(req.query.limit);
         if (page && limit) {
             const skip = (page - 1) * limit;
-            const total = await productModel.countDocuments();
+            const filter = { status: "active" }
+            const total = await productModel.countDocuments(filter);
             const totalpage = Math.ceil(total / limit);
-            const products = await productModel.find().skip(skip).limit(limit);
+            const products = await productModel.find(filter).skip(skip).limit(limit);
             return res.status(200).json({
                 status: "success",
                 products: products,
@@ -36,7 +37,6 @@ exports.getProducts = async (req, res) => {
         }
     }
     catch (e) {
-        console.log(e)
         return res.status(500).json({
             status: "fail",
             message: e
