@@ -10,7 +10,7 @@ exports.userRegistration = async (req, res) => {
         reqBody.password = hashPasword;
         let payload = {
             email: reqBody.email,
-            role: reqBody.role,
+            role: "customer",
         }
         let token = jwt.sign(payload, process.env.secret_key);
         await userModel.create(reqBody);

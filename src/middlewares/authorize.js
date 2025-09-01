@@ -16,7 +16,7 @@ function authorize(allowedRoles = []) {
             }
             else {
                 let { email, role } = decoded;
-                req.user = {email, role};
+                req.user = { email, role };
                 if (allowedRoles.length && !allowedRoles.includes(role)) {
                     return res.status(403).json({
                         status: "forbidden",

@@ -27,9 +27,6 @@ const productSchema = new Schema(
     {
         title: { type: String, required: true, trim: true },
         description: { type: String },
-
-        brand: { type: Schema.Types.ObjectId, ref: "Brand" },
-        category: [{ type: Schema.Types.ObjectId, ref: "Category" }],
         collections: [{ type: Schema.Types.ObjectId, ref: "Collection" }],
 
         images: [
@@ -83,5 +80,4 @@ productSchema.index({ category: 1 });
 productSchema.index({ title: "text", description: "text", tags: "text" });
 
 const Product = mongoose.model("products", productSchema);
-
 module.exports = Product;
