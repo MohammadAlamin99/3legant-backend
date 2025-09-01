@@ -4,6 +4,7 @@ const productController = require("../controllers/productController");
 const userController = require("../controllers/userController");
 const collectionController = require("../controllers/collectionController");
 const authorize = require("../middlewares/authorize");
+const wishlistController = require("../controllers/wishlistController");
 
 // product routes
 router.post("/products", authorize(["admin"]), productController.createProduct);
@@ -23,5 +24,8 @@ router.get("/collection", collectionController.getCollections);
 router.patch("/collection/:id", authorize(["admin"]), collectionController.updateCollection);
 router.delete("/collection/:id", authorize(["admin"]), collectionController.deleteCollection);
 
+// wishlist routes
+router.post("/wishlist", authorize(["customer"]), wishlistController.createWishlist);
+router.get("/wishlist", authorize(["customer"]), wishlistController.getWishlist);
 
 module.exports = router;

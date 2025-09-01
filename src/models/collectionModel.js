@@ -19,6 +19,11 @@ const collectionSchema = new Schema(
             type: Boolean,
             default: true,
         },
+        section: {
+            type: String,
+            trim: true,
+            default: "default",
+        },
     },
     {
         timestamps: true,

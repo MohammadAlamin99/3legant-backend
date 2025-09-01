@@ -28,7 +28,12 @@ exports.createCollection = async (req, res) => {
 // get all collections
 exports.getCollections = async (req, res) => {
     try {
-        const collections = await collectionModel.find({ isActive: true });
+        const section = req.query.section;
+        const filter = { isActive: true };
+        if (section) {
+            filter.section = section.trim();
+        }
+        const collections = await collectionModel.find(filter);
         return res.status(200).json({
             status: "success",
             data: collections,
