@@ -22,19 +22,25 @@ exports.getProducts = async (req, res) => {
     try {
         const page = parseInt(req.query.page);
         const limit = parseInt(req.query.limit);
-        if (page && limit) {
-            const skip = (page - 1) * limit;
-            const filter = { status: "active" }
-            const total = await productModel.countDocuments(filter);
-            const totalpage = Math.ceil(total / limit);
-            const products = await productModel.find(filter).skip(skip).limit(limit);
-            return res.status(200).json({
-                status: "success",
-                products: products,
-                totalPages: totalpage,
-                totalProducts: total,
-            })
+        const tagProduct = req.query.tags;
+        const filter = { status: "active" }
+
+        if (tagProduct) {
+            let tagList = [];
+            tagList = tagProduct.split(",").map(t => t.trim());
+            filter.tags = { $in: tagList }
         }
+
+        const skip = (page - 1) * limit;
+        const total = await productModel.countDocuments(filter);
+        const totalpage = Math.ceil(total / limit);
+        const products = await productModel.find(filter).skip(skip).limit(limit);
+        return res.status(200).json({
+            status: "success",
+            products: products,
+            totalPages: totalpage,
+            totalProducts: total,
+        })
     }
     catch (e) {
         return res.status(500).json({
