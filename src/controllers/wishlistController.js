@@ -68,5 +68,3 @@ exports.getWishlist = async (req, res) => {
         })
     }
 }
-
-
