@@ -31,5 +31,6 @@ router.get("/wishlist", authorize(["customer"]), wishlistController.getWishlist)
 
 // review routes
 router.post("/review", authorize(["customer"]), reviewController.createReview);
+router.get("/review", reviewController.getReview);
 
 module.exports = router;
