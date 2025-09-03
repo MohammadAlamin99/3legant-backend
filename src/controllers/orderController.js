@@ -1,3 +1,4 @@
+const { Types } = require("mongoose");
 const Order = require("../models/orderModel");
 const Product = require("../models/productModel");
 
@@ -13,7 +14,7 @@ exports.createOrder = async (req, res) => {
         let subtotal = 0;
         const finalItems = [];
 
-        // ✅ Validate items & fetch product/variant details
+        // Validate items & fetch product/variant details
         for (const item of items) {
             const product = await Product.findById(item.productId);
             if (!product) {
@@ -42,7 +43,7 @@ exports.createOrder = async (req, res) => {
                     image: variant.image || product.featureImage,
                 });
 
-                // ✅ Deduct stock
+                // Deduct stock
                 variant.stock -= item.qty;
                 await product.save();
             } else {
@@ -59,18 +60,16 @@ exports.createOrder = async (req, res) => {
                     qty: item.qty,
                     image: product.featureImage,
                 });
-
-                // (Optional: if you manage stock at product level, deduct here)
             }
         }
 
-        // ✅ Totals
-        const discount = 0; // apply coupon logic here if needed
-        const shipping = 0; // calculate dynamically if needed
-        const tax = 0; // calculate if needed
+        // Totals
+        const discount = 0;
+        const shipping = 0;
+        const tax = 0;
         const grandTotal = subtotal - discount + shipping + tax;
 
-        // ✅ Generate order number if not provided
+        //  Generate order number if not provided
         let orderNo = req.body.orderNo;
         if (!orderNo) {
             const year = new Date().getFullYear();
@@ -78,7 +77,7 @@ exports.createOrder = async (req, res) => {
             orderNo = `SHP-${year}-${String(count + 1).padStart(6, "0")}`;
         }
 
-        // ✅ Create order
+        // Create order
         const order = await Order.create({
             orderNo,
             userId,
@@ -92,7 +91,79 @@ exports.createOrder = async (req, res) => {
 
         res.status(201).json({ message: "Order placed successfully", order });
     } catch (err) {
-        console.error("Create Order Error:", err);
         res.status(500).json({ message: "Something went wrong", error: err.message });
+    }
+};
+
+
+// order get 
+
+exports.getOrder = async (req, res) => {
+    try {
+        const userId = new Types.ObjectId(req.query.id);
+        const orderCount = await Order.countDocuments();
+        const order = await Order.find({ userId });
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+        res.status(200).json({ message: "Order retrieved successfully", order, totalOrder: orderCount });
+    } catch (err) {
+        res.status(500).json({ message: "Something went wrong", error: err.message });
+    }
+}
+
+// update order 
+exports.updateOrder = async (req, res) => {
+    try {
+        const reqBody = req.body;
+        const orderId = reqBody.orderId;
+
+        const order = await Order.findByIdAndUpdate(
+            orderId,
+            reqBody,
+            { new: true, runValidators: true }
+        );
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Order updated successfully",
+            data: order,
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+            error: err.message,
+        });
+    }
+};
+
+// order delete
+
+exports.deleteOrder = async (req, res) => {
+    try {
+        const orderId = new Types.ObjectId(req.params.id);
+        const order = await Order.findByIdAndDelete(orderId);
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Order deleted successfully",
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+            error: err.message,
+        });
     }
 };
