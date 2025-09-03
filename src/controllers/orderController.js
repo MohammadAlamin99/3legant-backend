@@ -20,7 +20,6 @@ exports.createOrder = async (req, res) => {
             if (!product) {
                 return res.status(404).json({ message: "Product not found" });
             }
-
             let variant;
             if (item.variantId) {
                 variant = product.variants.id(item.variantId);
@@ -143,7 +142,6 @@ exports.updateOrder = async (req, res) => {
 };
 
 // order delete
-
 exports.deleteOrder = async (req, res) => {
     try {
         const orderId = new Types.ObjectId(req.params.id);
