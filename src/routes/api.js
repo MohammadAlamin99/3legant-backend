@@ -6,6 +6,7 @@ const collectionController = require("../controllers/collectionController");
 const authorize = require("../middlewares/authorize");
 const wishlistController = require("../controllers/wishlistController");
 const reviewController = require("../controllers/reviewController");
+const orderController = require("../controllers/orderController");
 
 // product routes
 router.post("/products", authorize(["admin"]), productController.createProduct);
@@ -32,5 +33,8 @@ router.get("/wishlist", authorize(["customer"]), wishlistController.getWishlist)
 // review routes
 router.post("/review", authorize(["customer"]), reviewController.createReview);
 router.get("/review", reviewController.getReview);
+
+// order routes
+router.post("/order", authorize(["admin", "customer"]), orderController.createOrder);
 
 module.exports = router;
