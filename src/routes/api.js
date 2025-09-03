@@ -7,6 +7,7 @@ const authorize = require("../middlewares/authorize");
 const wishlistController = require("../controllers/wishlistController");
 const reviewController = require("../controllers/reviewController");
 const orderController = require("../controllers/orderController");
+const blogController = require("../controllers/blogController");
 
 // product routes
 router.post("/products", authorize(["admin"]), productController.createProduct);
@@ -39,5 +40,11 @@ router.post("/order", authorize(["admin", "customer"]), orderController.createOr
 router.get("/order", authorize(["admin", "customer"]), orderController.getOrder);
 router.patch("/order", authorize(["admin"]), orderController.updateOrder);
 router.delete("/order/:id", authorize(["admin"]), orderController.deleteOrder);
+
+// blog routes
+router.post("/blog", authorize(["admin"]), blogController.createBlog);
+router.get("/blog", blogController.getBlogs);
+router.delete("/blog/:id", authorize(["admin"]), blogController.deleteBlog);
+router.patch("/blog/:id", authorize(["customer"]), blogController.updateBlog);
 
 module.exports = router;
