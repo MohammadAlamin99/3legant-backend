@@ -36,5 +36,8 @@ router.get("/review", reviewController.getReview);
 
 // order routes
 router.post("/order", authorize(["admin", "customer"]), orderController.createOrder);
+router.get("/order", authorize(["admin", "customer"]), orderController.getOrder);
+router.patch("/order", authorize(["admin"]), orderController.updateOrder);
+router.delete("/order/:id", authorize(["admin"]), orderController.deleteOrder);
 
 module.exports = router;
