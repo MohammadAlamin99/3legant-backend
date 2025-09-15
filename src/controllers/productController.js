@@ -49,6 +49,25 @@ exports.getProducts = async (req, res) => {
     }
 }
 
+// get product by id
+
+exports.getProductById  = async (req, res)=>{
+    try {
+        let id = req.params.id;
+        const product = await productModel.findById(id);
+        return res.status(200).json({
+            status:"success",
+            message:product,
+        })
+    } catch (e) {
+        return res.status(500).json({
+            status:"fail",
+            message:e.message || "Internal server error",
+        })
+    }
+}
+
+
 // update product by id
 exports.updateProduct = async (req, res) => {
     try {
