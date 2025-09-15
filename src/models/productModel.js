@@ -38,7 +38,7 @@ const productSchema = new Schema(
         featureImage: { type: String },
 
         tags: [{ type: String, trim: true }],
-
+        badge: {type:String},
         basePrice: { type: Number, required: true },
         compareAtPrice: { type: Number },
 
