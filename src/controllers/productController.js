@@ -31,7 +31,7 @@ exports.getProducts = async (req, res) => {
         }
 
         const skip = (page - 1) * limit;
-        const total = await productModel.estimatedDocumentCount(filter);
+        const total = await productModel.countDocuments(filter);
         const totalpage = Math.ceil(total / limit);
         const products = await productModel.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 });;
         return res.status(200).json({
@@ -50,7 +50,6 @@ exports.getProducts = async (req, res) => {
 }
 
 // get product by id
-
 exports.getProductById  = async (req, res)=>{
     try {
         let id = req.params.id;
