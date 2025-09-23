@@ -79,13 +79,49 @@ exports.getProductByCollectionId = async (req, res) => {
             totalProducts: total,
         });
     } catch (e) {
-        console.log(e)
         return res.status(500).json({
             status: "fail",
             message: "Internal Server error"
         })
     }
 }
+
+
+// get products filtered by basePrice range
+exports.getProductByPrice = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const { minPrice, maxPrice } = req.query;
+        const filter = {
+            status: "active",
+        };
+        if (minPrice || maxPrice) {
+            filter.basePrice = {};
+            if (minPrice) filter.basePrice.$gte = parseFloat(minPrice);
+            if (maxPrice) filter.basePrice.$lte = parseFloat(maxPrice);
+        }
+        const result = await productModel
+            .find(filter)
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        const total = await productModel.countDocuments(filter);
+        return res.status(200).json({
+            status: "success",
+            products: result,
+            totalProducts: total,
+        });
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({
+            status: "fail",
+            message: "Internal Server error",
+        });
+    }
+};
 
 // get product by id
 exports.getProductById = async (req, res) => {
