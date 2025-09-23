@@ -1,5 +1,5 @@
 const productModel = require("../models/productModel");
-
+const mongoose = require("mongoose");
 // Create Product
 exports.createProduct = async (req, res) => {
     try {
@@ -56,7 +56,7 @@ exports.getProductByCollectionId = async (req, res) => {
         const limit = parseInt(req.query.limit);
         const skip = (page - 1) * limit;
 
-        const collectionID = req.query.id;
+        const collectionID = new mongoose.Types.ObjectId(req.query.id);
         const filter = { collections: { $in: [collectionID] } }
 
         const result = await productModel.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 });
@@ -67,6 +67,7 @@ exports.getProductByCollectionId = async (req, res) => {
             totalProducts: total,
         });
     } catch (e) {
+        console.log(e)
         return res.status(500).json({
             status: "fail",
             message: "Internal Server error"
