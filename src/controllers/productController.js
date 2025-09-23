@@ -87,7 +87,7 @@ exports.getProductByCollectionId = async (req, res) => {
 }
 
 
-// get products filtered by basePrice range
+// get products by price range
 exports.getProductByPrice = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
