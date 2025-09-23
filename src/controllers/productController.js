@@ -33,7 +33,7 @@ exports.getProducts = async (req, res) => {
         const skip = (page - 1) * limit;
         const total = await productModel.estimatedDocumentCount(filter);
         const totalpage = Math.ceil(total / limit);
-        const products = await productModel.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 });;
+        const products = await productModel.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 });
         return res.status(200).json({
             status: "success",
             products: products,
@@ -49,19 +49,44 @@ exports.getProducts = async (req, res) => {
     }
 }
 
+// get product by collection id
+exports.getProductByCollectionId = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit);
+        const skip = (page - 1) * limit;
+
+        const collectionID = req.query.id;
+        const filter = { collections: { $in: [collectionID] } }
+
+        const result = await productModel.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 });
+        const total = await productModel.countDocuments(filter);
+        return res.status(200).json({
+            status: "success",
+            products: result,
+            totalProducts: total,
+        });
+    } catch (e) {
+        return res.status(500).json({
+            status: "fail",
+            message: "Internal Server error"
+        })
+    }
+}
+
 // get product by id
-exports.getProductById  = async (req, res)=>{
+exports.getProductById = async (req, res) => {
     try {
         let id = req.params.id;
         const product = await productModel.findById(id);
         return res.status(200).json({
-            status:"success",
-            message:product,
+            status: "success",
+            message: product,
         })
     } catch (e) {
         return res.status(500).json({
-            status:"fail",
-            message:e.message || "Internal server error",
+            status: "fail",
+            message: e.message || "Internal server error",
         })
     }
 }

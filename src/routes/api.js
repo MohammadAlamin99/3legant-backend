@@ -16,6 +16,7 @@ router.get("/products", productController.getProducts);
 router.patch("/products/:id", authorize(["admin"]), productController.updateProduct);
 router.delete("/products/:id", authorize(["admin"]), productController.deleteProduct);
 router.get("/product/:id", productController.getProductById);
+router.get("/products/collection", productController.getProductByCollectionId);
 
 // user routes
 router.post("/auth/register", userController.userRegistration);
