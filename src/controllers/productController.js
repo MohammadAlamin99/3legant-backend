@@ -66,7 +66,10 @@ exports.getProductByCollectionId = async (req, res) => {
         }
 
         const collectionID = new mongoose.Types.ObjectId(req.query.id);
-        const filter = { collections: { $in: [collectionID] } }
+        const filter = {
+            collections: { $in: [collectionID] },
+            status: "active",
+        }
 
         const result = await productModel.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 });
         const total = await productModel.countDocuments(filter);
