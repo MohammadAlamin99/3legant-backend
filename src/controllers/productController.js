@@ -56,6 +56,15 @@ exports.getProductByCollectionId = async (req, res) => {
         const limit = parseInt(req.query.limit);
         const skip = (page - 1) * limit;
 
+        const { id } = req.query;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Invalid collection ID",
+            });
+        }
+
         const collectionID = new mongoose.Types.ObjectId(req.query.id);
         const filter = { collections: { $in: [collectionID] } }
 
