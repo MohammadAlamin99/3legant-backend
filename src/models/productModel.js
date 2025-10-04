@@ -22,6 +22,14 @@ const variantSchema = new Schema(
     { _id: true }
 );
 
+const metafieldsSchema = new Schema(
+    {
+        title: { type: String, required: true, trim: true },
+        content: { type: String, required: true },
+    },
+    { _id: false }
+);
+
 // Product Schema
 const productSchema = new Schema(
     {
@@ -38,7 +46,7 @@ const productSchema = new Schema(
         featureImage: { type: String },
 
         tags: [{ type: String, trim: true }],
-        badge: {type:String},
+        badge: { type: String },
         basePrice: { type: Number, required: true },
         compareAtPrice: { type: Number },
 
@@ -49,6 +57,7 @@ const productSchema = new Schema(
         },
 
         variants: [variantSchema],
+        metafields: [metafieldsSchema],
 
         status: {
             type: String,
