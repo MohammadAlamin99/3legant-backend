@@ -50,6 +50,27 @@ exports.getProducts = async (req, res) => {
     }
 }
 
+// get products by ids
+exports.getProductsbyIds = async (req, res) => {
+    try {
+        const { ids } = req.body;
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ message: "Product IDs are required" });
+        }
+        const products = await productModel.find({ _id: { $in: ids } });
+        res.status(200).json({
+            status: "success",
+            data: products,
+        })
+
+    } catch (e) {
+        res.status(500).json({
+            status: "fail",
+            message: "Somthing Went Wrong"
+        })
+    }
+}
+
 // get product by collection id
 exports.getProductByCollectionId = async (req, res) => {
     try {
