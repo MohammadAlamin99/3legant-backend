@@ -57,13 +57,16 @@ exports.getProductsbyIds = async (req, res) => {
         if (!ids || !Array.isArray(ids) || ids.length === 0) {
             return res.status(400).json({ message: "Product IDs are required" });
         }
-        const products = await productModel.find({ _id: { $in: ids } });
+        const products = await productModel.find({
+            _id: { $in: ids.map(id => new mongoose.Types.ObjectId(id)) }
+        });
         res.status(200).json({
             status: "success",
             data: products,
         })
 
     } catch (e) {
+        console.log(e)
         res.status(500).json({
             status: "fail",
             message: "Somthing Went Wrong"
@@ -110,6 +113,7 @@ exports.getProductByCollectionId = async (req, res) => {
 
 
 // get products by price range
+
 exports.getProductByPrice = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
