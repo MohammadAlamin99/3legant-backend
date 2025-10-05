@@ -50,29 +50,49 @@ exports.getProducts = async (req, res) => {
     }
 }
 
-// get products by ids
-exports.getProductsbyIds = async (req, res) => {
-    try {
-        const { ids } = req.body;
-        if (!ids || !Array.isArray(ids) || ids.length === 0) {
-            return res.status(400).json({ message: "Product IDs are required" });
-        }
-        const products = await productModel.find({
-            _id: { $in: ids.map(id => new mongoose.Types.ObjectId(id)) }
-        });
-        res.status(200).json({
-            status: "success",
-            data: products,
-        })
+// get products by variantIds
 
-    } catch (e) {
-        console.log(e)
-        res.status(500).json({
-            status: "fail",
-            message: "Somthing Went Wrong"
-        })
+exports.getProductsbyIds = async (req, res) => {
+  try {
+    const { variantIds } = req.body;
+    if (!variantIds || !Array.isArray(variantIds) || variantIds.length === 0) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Variant IDs are required and must be an array.",
+      });
     }
-}
+    const objectIds = variantIds.map(id => new mongoose.Types.ObjectId(id));
+    const products = await productModel.aggregate([
+      { $unwind: "$variants" },
+      { $match: { "variants._id": { $in: objectIds } } }, 
+      {
+        $group: {
+          _id: "$_id",
+          title: { $first: "$title" },
+          description: { $first: "$description" },
+          featureImage: { $first: "$featureImage" },
+          basePrice: { $first: "$basePrice" },
+          badge: { $first: "$badge" },
+          variants: { $push: "$variants" },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: "success",
+      count: products.length,
+      data: products,
+    });
+  } catch (error) {
+    console.error("Error fetching products by variant IDs:", error);
+    res.status(500).json({
+      status: "fail",
+      message: "Something went wrong while fetching products by variant IDs.",
+    });
+  }
+};
+
+
 
 // get product by collection id
 exports.getProductByCollectionId = async (req, res) => {
