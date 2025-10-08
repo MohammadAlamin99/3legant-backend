@@ -19,6 +19,7 @@ router.get("/product/:id", productController.getProductById);
 router.get("/products/collection", productController.getProductByCollectionId);
 router.get("/products/price", productController.getProductByPrice);
 router.post("/products/ids", productController.getProductsbyIds);
+router.get("/products/search", productController.productSearchByKeywords);
 
 // user routes
 router.post("/auth/register", userController.userRegistration);
