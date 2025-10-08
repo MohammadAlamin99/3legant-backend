@@ -53,43 +53,43 @@ exports.getProducts = async (req, res) => {
 // get products by variantIds
 
 exports.getProductsbyIds = async (req, res) => {
-  try {
-    const { variantIds } = req.body;
-    if (!variantIds || !Array.isArray(variantIds) || variantIds.length === 0) {
-      return res.status(400).json({
-        status: "fail",
-        message: "Variant IDs are required and must be an array.",
-      });
-    }
-    const objectIds = variantIds.map(id => new mongoose.Types.ObjectId(id));
-    const products = await productModel.aggregate([
-      { $unwind: "$variants" },
-      { $match: { "variants._id": { $in: objectIds } } }, 
-      {
-        $group: {
-          _id: "$_id",
-          title: { $first: "$title" },
-          description: { $first: "$description" },
-          featureImage: { $first: "$featureImage" },
-          basePrice: { $first: "$basePrice" },
-          badge: { $first: "$badge" },
-          variants: { $push: "$variants" },
-        },
-      },
-    ]);
+    try {
+        const { variantIds } = req.body;
+        if (!variantIds || !Array.isArray(variantIds) || variantIds.length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Variant IDs are required and must be an array.",
+            });
+        }
+        const objectIds = variantIds.map(id => new mongoose.Types.ObjectId(id));
+        const products = await productModel.aggregate([
+            { $unwind: "$variants" },
+            { $match: { "variants._id": { $in: objectIds } } },
+            {
+                $group: {
+                    _id: "$_id",
+                    title: { $first: "$title" },
+                    description: { $first: "$description" },
+                    featureImage: { $first: "$featureImage" },
+                    basePrice: { $first: "$basePrice" },
+                    badge: { $first: "$badge" },
+                    variants: { $push: "$variants" },
+                },
+            },
+        ]);
 
-    res.status(200).json({
-      status: "success",
-      count: products.length,
-      data: products,
-    });
-  } catch (error) {
-    console.error("Error fetching products by variant IDs:", error);
-    res.status(500).json({
-      status: "fail",
-      message: "Something went wrong while fetching products by variant IDs.",
-    });
-  }
+        res.status(200).json({
+            status: "success",
+            count: products.length,
+            data: products,
+        });
+    } catch (error) {
+        console.error("Error fetching products by variant IDs:", error);
+        res.status(500).json({
+            status: "fail",
+            message: "Something went wrong while fetching products by variant IDs.",
+        });
+    }
 };
 
 
@@ -130,7 +130,6 @@ exports.getProductByCollectionId = async (req, res) => {
         })
     }
 }
-
 
 // get products by price range
 
@@ -223,3 +222,61 @@ exports.deleteProduct = async (req, res) => {
         })
     }
 }
+
+
+// // product search by keyword
+exports.productSearchByKeywords = async (req, res) => {
+    try {
+        const keyword = req.query.keyword?.trim();
+        if (!keyword) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Search keyword is required !"
+            })
+        }
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 12;
+        const skip = (page - 1) * limit;
+
+        const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const regex = new RegExp(escaped, "i");
+
+        const query = {
+            $or: [
+                { title: regex },
+                { description: regex },
+                { tags: regex },
+                { "variants.title": regex },
+                { "variants.sku": regex },
+            ],
+            status: "active",
+        }
+
+        const products = await productModel.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        const total = await productModel.countDocuments(query);
+
+        return res.status(200).json({
+            status: "success",
+            message: "Products retrieved successfully",
+            data: products,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+            },
+        });
+    } catch (e) {
+        return res.status(500).json({
+            "status": "fail",
+            message: "Internal server error",
+            error: e.message,
+        });
+    }
+}
+
