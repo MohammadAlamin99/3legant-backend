@@ -131,13 +131,13 @@ exports.createOrder = async (req, res) => {
                     });
                 }
 
-                if (variant.stock < item.qty) {
+                if (variant.stock < item.quantity) {
                     return res.status(400).json({
                         message: `Insufficient stock for variant "${variant.title}"`,
                     });
                 }
 
-                subtotal += Number(variant.price) * Number(item.qty);
+                subtotal += Number(variant.price) * Number(item.quantity);
 
                 finalItems.push({
                     productId: product._id,
@@ -145,12 +145,12 @@ exports.createOrder = async (req, res) => {
                     title: product.title,
                     variantTitle: variant.title,
                     price: Number(variant.price),
-                    qty: Number(item.qty),
+                    quantity: Number(item.quantity),
                     image: variant.image || product.featureImage,
                 });
 
                 // ✅ Deduct stock safely
-                variant.stock = Number(variant.stock) - Number(item.qty);
+                variant.stock = Number(variant.stock) - Number(item.quantity);
                 await product.save();
             } else {
                 // ✅ Product without variants
@@ -158,13 +158,13 @@ exports.createOrder = async (req, res) => {
                     return res.status(400).json({ message: "Invalid product price" });
                 }
 
-                subtotal += Number(product.basePrice) * Number(item.qty);
+                subtotal += Number(product.basePrice) * Number(item.quantity);
 
                 finalItems.push({
                     productId: product._id,
                     title: product.title,
                     price: Number(product.basePrice),
-                    qty: Number(item.qty),
+                    quantity: Number(item.quantity),
                     image: product.featureImage,
                 });
             }
