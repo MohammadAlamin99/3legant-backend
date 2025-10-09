@@ -66,8 +66,10 @@ exports.createOrder = async (req, res) => {
         const tax = 0;
         const grandTotal = subtotal - discount + shipping + tax;
 
-        //  Generate order number if not provided
-        const orderNo = `SHP-${year}-${String(count + 1).padStart(6, "0")}`;
+        //  Generate order number
+        const timestamp = Date.now().toString(36); 
+        const randomSuffix = Math.floor(1000 + Math.random() * 9000).toString(36);
+        const orderNo = `SHP-${timestamp}-${randomSuffix}`;
 
         // Create order
         const order = await Order.create({
