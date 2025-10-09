@@ -10,7 +10,7 @@ const orderSchema = new Schema({
             title: { type: String, required: true },
             variantTitle: { type: String },
             price: { type: Number, required: true },
-            qty: { type: Number, required: true, min: 1 },
+            quantity: { type: Number, required: true, min: 1 },
             image: { type: String },
         }
     ],
