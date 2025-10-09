@@ -10,10 +10,8 @@ exports.createOrder = async (req, res) => {
         if (!items || !items.length) {
             return res.status(400).json({ message: "No items in order" });
         }
-
         let subtotal = 0;
         const finalItems = [];
-
         // Validate items & fetch product/variant details
         for (const item of items) {
             const product = await Product.findById(item.productId);
@@ -69,12 +67,7 @@ exports.createOrder = async (req, res) => {
         const grandTotal = subtotal - discount + shipping + tax;
 
         //  Generate order number if not provided
-        let orderNo = req.body.orderNo;
-        if (!orderNo) {
-            const year = new Date().getFullYear();
-            const count = await Order.countDocuments();
-            orderNo = `SHP-${year}-${String(count + 1).padStart(6, "0")}`;
-        }
+        const orderNo = `SHP-${year}-${String(count + 1).padStart(6, "0")}`;
 
         // Create order
         const order = await Order.create({
