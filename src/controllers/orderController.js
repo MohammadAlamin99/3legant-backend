@@ -93,11 +93,12 @@ const Product = require("../models/productModel");
 
 
 // CREATE ORDER
-
 exports.createOrder = async (req, res) => {
     try {
-        let { userId, items, shippingAddress, contact, payment, notes } = req.body;
-        userId = new Types.ObjectId(userId); // ✅ now legal
+        const { userId, items, shippingAddress, contact, payment, notes } = req.body;
+
+        // ✅ Ensure userId is a valid ObjectId
+        const userObjectId = new Types.ObjectId(userId);
 
         if (!items || !items.length) {
             return res.status(400).json({ message: "No items in order" });
@@ -106,68 +107,84 @@ exports.createOrder = async (req, res) => {
         let subtotal = 0;
         const finalItems = [];
 
-        // Validate items & fetch product/variant details
+        // ✅ Validate each item
         for (const item of items) {
             const product = await Product.findById(item.productId);
             if (!product) {
                 return res.status(404).json({ message: "Product not found" });
             }
 
+            let variant;
+
+            // ✅ If product has variant
             if (item.variantId) {
-                const variant = product.variants.id(item.variantId);
+                variant = product.variants.id(item.variantId);
                 if (!variant) {
                     return res.status(404).json({ message: "Variant not found" });
                 }
-                if (variant.stock < item.qty) {
-                    return res.status(400).json({ message: "Insufficient stock for variant" });
+
+                // ✅ Check and sanitize stock
+                variant.stock = Number(variant.stock);
+                if (isNaN(variant.stock)) {
+                    return res.status(400).json({
+                        message: `Invalid stock value for variant "${variant.title}"`,
+                    });
                 }
 
-                subtotal += variant.price * item.qty;
+                if (variant.stock < item.qty) {
+                    return res.status(400).json({
+                        message: `Insufficient stock for variant "${variant.title}"`,
+                    });
+                }
+
+                subtotal += Number(variant.price) * Number(item.qty);
 
                 finalItems.push({
                     productId: product._id,
                     variantId: variant._id,
                     title: product.title,
                     variantTitle: variant.title,
-                    price: variant.price,
-                    qty: item.qty,
+                    price: Number(variant.price),
+                    qty: Number(item.qty),
                     image: variant.image || product.featureImage,
                 });
 
-                variant.stock -= item.qty;
+                // ✅ Deduct stock safely
+                variant.stock = Number(variant.stock) - Number(item.qty);
                 await product.save();
             } else {
-                if (product.basePrice < 0) {
+                // ✅ Product without variants
+                if (isNaN(product.basePrice) || product.basePrice < 0) {
                     return res.status(400).json({ message: "Invalid product price" });
                 }
 
-                subtotal += product.basePrice * item.qty;
+                subtotal += Number(product.basePrice) * Number(item.qty);
 
                 finalItems.push({
                     productId: product._id,
                     title: product.title,
-                    price: product.basePrice,
-                    qty: item.qty,
+                    price: Number(product.basePrice),
+                    qty: Number(item.qty),
                     image: product.featureImage,
                 });
             }
         }
 
-        // Totals
+        // ✅ Totals
         const discount = 0;
         const shipping = 0;
         const tax = 0;
         const grandTotal = subtotal - discount + shipping + tax;
 
-        // Generate order number
+        // ✅ Generate unique order number
         const timestamp = Date.now().toString(36);
         const randomSuffix = Math.floor(1000 + Math.random() * 9000).toString(36);
         const orderNo = `SHP-${timestamp}-${randomSuffix}`;
 
-        // Create order
+        // ✅ Create and save the order
         const order = await Order.create({
             orderNo,
-            userId,
+            userId: userObjectId,
             items: finalItems,
             totals: { subtotal, discount, shipping, tax, grandTotal },
             shippingAddress,
@@ -176,12 +193,20 @@ exports.createOrder = async (req, res) => {
             notes,
         });
 
-        res.status(201).json({ message: "Order placed successfully", order });
+        // ✅ Respond success
+        res.status(201).json({
+            message: "Order placed successfully",
+            order,
+        });
+
     } catch (err) {
-        res.status(500).json({ message: "Something went wrong", error: err.message });
+        console.error("❌ Error creating order:", err);
+        res.status(500).json({
+            message: "Something went wrong",
+            error: err.message,
+        });
     }
 };
-
 
 // order get 
 
