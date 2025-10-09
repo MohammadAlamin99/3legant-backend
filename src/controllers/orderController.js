@@ -6,7 +6,7 @@ const Product = require("../models/productModel");
 exports.createOrder = async (req, res) => {
     try {
         const { userId, items, shippingAddress, contact, payment, notes } = req.body;
-
+        userId = new Types.ObjectId(userId);
         if (!items || !items.length) {
             return res.status(400).json({ message: "No items in order" });
         }
@@ -15,6 +15,7 @@ exports.createOrder = async (req, res) => {
         // Validate items & fetch product/variant details
         for (const item of items) {
             const product = await Product.findById(item.productId);
+            
             if (!product) {
                 return res.status(404).json({ message: "Product not found" });
             }
