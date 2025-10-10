@@ -4,61 +4,23 @@ const userModel = require("../models/userModel");
 
 // Registration
 
-// exports.userRegistration = async (req, res) => {
-//     try {
-//         const hashPasword = await bcrypt.hash(req.body.password, 10);
-//         let reqBody = req.body;
-//         reqBody.password = hashPasword;
-//         let payload = {
-//             email: reqBody.email,
-//             role: "customer",
-//         }
-//         let token = jwt.sign(payload, process.env.secret_key);
-//         await userModel.create(reqBody);
-//         return res.status(201).json({
-//             status: "success",
-//             message: "User registation successful",
-//             token: token,
-//         })
-//     } catch (e) {
-//         if (e.code === 11000 && e.keyPattern && e.keyPattern.email) {
-//             return res.status(400).json({
-//                 status: "fail",
-//                 message: "Email already exists.",
-//             });
-//         }
-//         return res.status(500).json({
-//             status: "fail",
-//             message: e,
-//         })
-//     }
-// };
-
-
 exports.userRegistration = async (req, res) => {
     try {
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        let reqBody = { ...req.body, password: hashedPassword };
-
-        // Create user in database
+        const hashPasword = await bcrypt.hash(req.body.password, 10);
+        let reqBody = req.body;
+        reqBody.password = hashPasword;
         const newUser = await userModel.create(reqBody);
-
-        // Prepare payload with userId, email, and role
         let payload = {
-            userId: newUser._id, // <-- include user ID here
-            email: newUser.email,
+            userId:newUser._id,
+            email: reqBody.email,
             role: "customer",
-        };
-
-        // Sign JWT
-        let token = jwt.sign(payload, process.env.secret_key, { expiresIn: '7d' });
-
+        }
+        let token = jwt.sign(payload, process.env.secret_key);
         return res.status(201).json({
             status: "success",
-            message: "User registration successful",
+            message: "User registation successful",
             token: token,
-        });
+        })
     } catch (e) {
         if (e.code === 11000 && e.keyPattern && e.keyPattern.email) {
             return res.status(400).json({
@@ -68,13 +30,14 @@ exports.userRegistration = async (req, res) => {
         }
         return res.status(500).json({
             status: "fail",
-            message: e.message,
-        });
+            message: e,
+        })
     }
 };
 
 
 // login
+
 exports.userLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -97,6 +60,7 @@ exports.userLogin = async (req, res) => {
         const payload = {
             email: user.email,
             role: user.role,
+            userId: user._id,
         }
         const token = jwt.sign(payload, process.env.secret_key);
         return res.status(200).json({

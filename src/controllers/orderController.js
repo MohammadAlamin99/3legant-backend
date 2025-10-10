@@ -6,7 +6,8 @@ const Product = require("../models/productModel");
 
 exports.createOrder = async (req, res) => {
     try {
-        const { userId, items, shippingAddress, contact, payment, notes } = req.body;
+        const {items, shippingAddress, contact, payment, notes } = req.body;
+        const { userId } = req.user;
         const userObjectId = new Types.ObjectId(userId);
         if (!items || !items.length) {
             return res.status(400).json({ message: "No items in order" });
@@ -16,7 +17,6 @@ exports.createOrder = async (req, res) => {
         // Validate items & fetch product/variant details
         for (const item of items) {
             const product = await Product.findById(item.productId);
-
             if (!product) {
                 return res.status(404).json({ message: "Product not found" });
             }
@@ -29,9 +29,7 @@ exports.createOrder = async (req, res) => {
                 if (variant.stock < item.quantity) {
                     return res.status(400).json({ message: "Insufficient stock for variant" });
                 }
-
                 subtotal += variant.price * item.quantity;
-
                 finalItems.push({
                     productId: product._id,
                     variantId: variant._id,
@@ -41,7 +39,6 @@ exports.createOrder = async (req, res) => {
                     quantity: item.quantity,
                     image: variant.image || product.featureImage,
                 });
-
                 // Deduct stock
                 variant.stock -= item.quantity;
                 await product.save();
@@ -51,7 +48,6 @@ exports.createOrder = async (req, res) => {
                     return res.status(400).json({ message: "Invalid product price" });
                 }
                 subtotal += product.basePrice * item.quantity;
-
                 finalItems.push({
                     productId: product._id,
                     title: product.title,
@@ -69,14 +65,14 @@ exports.createOrder = async (req, res) => {
         const grandTotal = subtotal - discount + shipping + tax;
 
         //  Generate order number
-        const timestamp = Date.now().toString(36); 
+        const timestamp = Date.now().toString(36);
         const randomSuffix = Math.floor(1000 + Math.random() * 9000).toString(36);
         const orderNo = `SHP-${timestamp}-${randomSuffix}`;
 
         // Create order
         const order = await Order.create({
             orderNo,
-            userId:userObjectId,
+            userId: userObjectId,
             items: finalItems,
             totals: { subtotal, discount, shipping, tax, grandTotal },
             shippingAddress,
@@ -92,7 +88,6 @@ exports.createOrder = async (req, res) => {
 };
 
 // order get 
-
 exports.getOrder = async (req, res) => {
     try {
         const userId = new Types.ObjectId(req.query.id);
@@ -138,6 +133,7 @@ exports.updateOrder = async (req, res) => {
 };
 
 // order delete
+
 exports.deleteOrder = async (req, res) => {
     try {
         const orderId = new Types.ObjectId(req.params.id);
