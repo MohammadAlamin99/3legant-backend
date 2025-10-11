@@ -223,7 +223,6 @@ exports.deleteProduct = async (req, res) => {
     }
 }
 
-
 // // product search by keyword
 exports.productSearchByKeywords = async (req, res) => {
     try {
