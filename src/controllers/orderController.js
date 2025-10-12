@@ -60,7 +60,7 @@ exports.createOrder = async (req, res) => {
 
         // Totals
         const discount = 0;
-        const shipping = 0;
+        const shipping = 110;
         const tax = 0;
         const grandTotal = subtotal - discount + shipping + tax;
 
