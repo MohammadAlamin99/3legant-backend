@@ -6,7 +6,7 @@ const Product = require("../models/productModel");
 
 exports.createOrder = async (req, res) => {
     try {
-        const {items, shippingAddress, contact, payment, notes } = req.body;
+        const { items, shippingAddress, contact, payment, notes } = req.body;
         const { userId } = req.user;
         const userObjectId = new Types.ObjectId(userId);
         if (!items || !items.length) {
@@ -67,6 +67,7 @@ exports.createOrder = async (req, res) => {
         //  Generate order number
         const timestamp = Date.now().toString(36);
         const randomSuffix = Math.floor(1000 + Math.random() * 9000).toString(36);
+
         const orderNo = `SHP-${timestamp}-${randomSuffix}`;
 
         // Create order
@@ -90,9 +91,9 @@ exports.createOrder = async (req, res) => {
 // order get 
 exports.getOrder = async (req, res) => {
     try {
-        const userId = new Types.ObjectId(req.query.id);
+        const orderid = new Types.ObjectId(req.query.id);
         const orderCount = await Order.countDocuments();
-        const order = await Order.find({ userId });
+        const order = await Order.find({ _id:orderid }).sort({_id:-1});
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
@@ -101,6 +102,7 @@ exports.getOrder = async (req, res) => {
         res.status(500).json({ message: "Something went wrong", error: err.message });
     }
 }
+
 
 // update order 
 exports.updateOrder = async (req, res) => {
