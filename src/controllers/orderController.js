@@ -91,7 +91,7 @@ exports.createOrder = async (req, res) => {
 // order get 
 exports.getOrder = async (req, res) => {
     try {
-        const orderid = new Types.ObjectId(req.query.id);
+        const orderid = new Types.ObjectId(req.params.id);
         const orderCount = await Order.countDocuments();
         const order = await Order.find({ _id:orderid }).sort({_id:-1});
         if (!order) {
