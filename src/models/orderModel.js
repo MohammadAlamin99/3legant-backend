@@ -32,7 +32,7 @@ const orderSchema = new Schema({
     payment: {
         method: {
             type: String,
-            enum: ["BKASH", "NAGAD"],
+            enum: ["BKASH", "NAGAD", "COD"],
             required: true,
         },
         status: {
