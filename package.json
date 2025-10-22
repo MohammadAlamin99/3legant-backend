@@ -6,6 +6,7 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.0",
+    "stripe": "^19.1.0",
     "y": "^0.3.2"
   },
   "devDependencies": {

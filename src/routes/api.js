@@ -9,6 +9,7 @@ const reviewController = require("../controllers/reviewController");
 const orderController = require("../controllers/orderController");
 const blogController = require("../controllers/blogController");
 const cotactController = require("../controllers/cotactController");
+const paymentController = require("../controllers/paymentController");
 
 // product routes
 router.post("/products", authorize(["admin"]), productController.createProduct);
@@ -57,4 +58,6 @@ router.patch("/blog/:id", authorize(["customer"]), blogController.updateBlog);
 router.post("/contact", cotactController.createContact);
 router.get("/contact", authorize(["admin"]), cotactController.getContacts);
 
+// payment routes
+router.post("/payment", paymentController.PymentHandler);
 module.exports = router;
