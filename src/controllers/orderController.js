@@ -3,7 +3,6 @@ const Order = require("../models/orderModel");
 const Product = require("../models/productModel");
 
 // CREATE ORDER
-
 exports.createOrder = async (req, res) => {
     try {
         const { items, shippingAddress, contact, payment, notes } = req.body;
@@ -67,7 +66,6 @@ exports.createOrder = async (req, res) => {
         //  Generate order number
         const timestamp = Date.now().toString(36);
         const randomSuffix = Math.floor(1000 + Math.random() * 9000).toString(36);
-
         const orderNo = `SHP-${timestamp}-${randomSuffix}`;
 
         // Create order
@@ -93,7 +91,7 @@ exports.getOrder = async (req, res) => {
     try {
         const orderid = new Types.ObjectId(req.params.id);
         const orderCount = await Order.countDocuments();
-        const order = await Order.find({ _id:orderid }).sort({_id:-1});
+        const order = await Order.find({ _id: orderid }).sort({ _id: -1 });
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }

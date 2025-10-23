@@ -45,7 +45,7 @@ router.get("/review", reviewController.getReview);
 // order routes
 router.post("/order", authorize(["admin", "customer"]), orderController.createOrder);
 router.get("/order/:id", authorize(["admin", "customer"]), orderController.getOrder);
-router.patch("/order", authorize(["admin"]), orderController.updateOrder);
+router.patch("/order", orderController.updateOrder);
 router.delete("/order/:id", authorize(["admin"]), orderController.deleteOrder);
 
 // blog routes
@@ -59,5 +59,7 @@ router.post("/contact", cotactController.createContact);
 router.get("/contact", authorize(["admin"]), cotactController.getContacts);
 
 // payment routes
-router.post("/payment", paymentController.PymentHandler);
-module.exports = router;
+router.post("/payment", paymentController.PaymentHandler);
+// Webhook endpoint (Stripe requires raw body)
+router.post("/payment/webhook", paymentController.WebhookHandler);
+module.exports = router;    
