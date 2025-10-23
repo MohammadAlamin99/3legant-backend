@@ -10,6 +10,7 @@ const orderController = require("../controllers/orderController");
 const blogController = require("../controllers/blogController");
 const cotactController = require("../controllers/cotactController");
 const paymentController = require("../controllers/paymentController");
+const bodyParser = require("body-parser");
 
 // product routes
 router.post("/products", authorize(["admin"]), productController.createProduct);
@@ -61,5 +62,9 @@ router.get("/contact", authorize(["admin"]), cotactController.getContacts);
 // payment routes
 router.post("/payment", paymentController.PaymentHandler);
 // Webhook endpoint (Stripe requires raw body)
-router.post("/payment/webhook", paymentController.WebhookHandler);
+router.post(
+    "/payment/webhook",
+    bodyParser.raw({ type: "application/json" }),
+    paymentController.WebhookHandler
+);
 module.exports = router;    
