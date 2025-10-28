@@ -1,18 +1,89 @@
 const productModel = require("../models/productModel");
 const mongoose = require("mongoose");
+const cloudinary = require("../config/cloudinary");
 // Create Product
 exports.createProduct = async (req, res) => {
     try {
-        const product = req.body;
-        await productModel.create(product);
+        const productData = req.body;
+
+        // Parse JSON string fields (important for Postman/form-data)
+        const parseIfString = (field) => {
+            if (typeof field === "string") return JSON.parse(field);
+            return field;
+        };
+
+        productData.attributes = parseIfString(productData.attributes);
+        productData.variants = parseIfString(productData.variants);
+        productData.metafields = parseIfString(productData.metafields);
+        productData.dimensions = parseIfString(productData.dimensions);
+
+        // Store uploaded URLs
+        const images = [];
+        let featureImageUrl = "";
+        const variantImages = [];
+
+        // Handle file uploads (multer saves in req.files)
+        if (req.files) {
+            // Handle product images (multiple)
+            if (req.files["images"]) {
+                for (const file of req.files["images"]) {
+                    const fileBuffer = file.buffer.toString("base64");
+                    const uploaded = await cloudinary.uploader.upload(
+                        `data:${file.mimetype};base64,${fileBuffer}`,
+                        { folder: "product_images" }
+                    );
+                    images.push({ url: uploaded.secure_url, alt: file.originalname });
+                }
+            }
+
+            // Handle single feature image
+            if (req.files["featureImage"]) {
+                const file = req.files["featureImage"][0];
+                const fileBuffer = file.buffer.toString("base64");
+                const uploaded = await cloudinary.uploader.upload(
+                    `data:${file.mimetype};base64,${fileBuffer}`,
+                    { folder: "product_feature" }
+                );
+                featureImageUrl = uploaded.secure_url;
+            }
+
+            // Handle variant images (multiple, one per variant)
+            if (req.files["variantImages"]) {
+                for (const file of req.files["variantImages"]) {
+                    const fileBuffer = file.buffer.toString("base64");
+                    const uploaded = await cloudinary.uploader.upload(
+                        `data:${file.mimetype};base64,${fileBuffer}`,
+                        { folder: "variant_images" }
+                    );
+                    variantImages.push(uploaded.secure_url);
+                }
+            }
+        }
+
+        // Attach uploaded data
+        if (images.length > 0) productData.images = images;
+        if (featureImageUrl) productData.featureImage = featureImageUrl;
+
+        // Attach variant images if variant count matches uploaded files
+        if (productData.variants && productData.variants.length > 0 && variantImages.length > 0) {
+            productData.variants = productData.variants.map((variant, index) => ({
+                ...variant,
+                image: variantImages[index] || variant.image, // assign uploaded or existing URL
+            }));
+        }
+
+        // Save to database
+        const product = await productModel.create(productData);
+
         return res.status(201).json({
-            status: "sucess",
-            message: "Product created successfully"
+            status: "success",
+            message: "Product created successfully",
+            data: product,
         });
     } catch (e) {
         return res.status(500).json({
             status: "fail",
-            message: e,
+            message: e.message || e,
         });
     }
 };

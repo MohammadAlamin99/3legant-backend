@@ -14,7 +14,12 @@ const bodyParser = require("body-parser");
 const upload = require("../middlewares/upload");
 
 // product routes
-router.post("/products", authorize(["admin"]), productController.createProduct);
+router.post("/products", authorize(["customer"]), upload.fields([
+    { name: "images", maxCount: 10 },
+    { name: "featureImage", maxCount: 1 },
+    { name: "variantImages", maxCount: 10 },
+]), productController.createProduct);
+
 router.get("/products", productController.getProducts);
 router.patch("/products/:id", authorize(["admin"]), productController.updateProduct);
 router.delete("/products/:id", authorize(["admin"]), productController.deleteProduct);

@@ -97,6 +97,7 @@ exports.userProfile = async (req, res) => {
 
 
 // update profile
+
 exports.updateUserProfile = async (req, res) => {
     try {
         const email = req.user.email;
@@ -134,7 +135,6 @@ exports.updateUserProfile = async (req, res) => {
         })
 
     } catch (e) {
-        console.log(e)
         return res.status(500).json({
             status: "fail",
             message: e,
