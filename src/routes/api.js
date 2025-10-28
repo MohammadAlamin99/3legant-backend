@@ -11,6 +11,7 @@ const blogController = require("../controllers/blogController");
 const cotactController = require("../controllers/cotactController");
 const paymentController = require("../controllers/paymentController");
 const bodyParser = require("body-parser");
+const upload = require("../middlewares/upload");
 
 // product routes
 router.post("/products", authorize(["admin"]), productController.createProduct);
@@ -27,7 +28,7 @@ router.get("/products/search", productController.productSearchByKeywords);
 router.post("/auth/register", userController.userRegistration);
 router.post("/auth/login", userController.userLogin);
 router.get("/auth/user/profile", authorize(["admin", "customer"]), userController.userProfile);
-router.post("/auth/user/profile", authorize(["admin", "customer"]), userController.updateUserProfile);
+router.put("/auth/user/profile", authorize(["admin", "customer"]), upload.single("photo"), userController.updateUserProfile);
 
 // collection routes
 router.post("/collection", authorize(["admin"]), collectionController.createCollection);

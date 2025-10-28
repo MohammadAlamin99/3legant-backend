@@ -13,6 +13,7 @@ const userSchema = new Schema(
             enum: ["admin", "customer"],
             default: "customer",
         },
+        photo: { type: String, default: "" }
     },
     { timestamps: true }
 );

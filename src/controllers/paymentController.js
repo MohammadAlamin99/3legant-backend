@@ -38,7 +38,7 @@ exports.PaymentHandler = async (req, res) => {
 exports.WebhookHandler = async (req, res) => {
     const sig = req.headers["stripe-signature"];
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
+    console.log('Webhook received');
     let event;
 
     try {

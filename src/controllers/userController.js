@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
 const userModel = require("../models/userModel");
+const cloudinary = require("../config/cloudinary");
 
 // Registration
 
@@ -11,7 +12,7 @@ exports.userRegistration = async (req, res) => {
         reqBody.password = hashPasword;
         const newUser = await userModel.create(reqBody);
         let payload = {
-            userId:newUser._id,
+            userId: newUser._id,
             email: reqBody.email,
             role: "customer",
         }
@@ -115,6 +116,14 @@ exports.updateUserProfile = async (req, res) => {
         if (reqBody.password) {
             reqBody.password = await bcrypt.hash(reqBody.password, 10);
         }
+        if (req.file) {
+            const fileBuffer = req.file.buffer.toString("base64");
+            const uploaded = await cloudinary.uploader.upload(
+                `data:${req.file.mimetype};base64,${fileBuffer}`,
+                { folder: "user_profiles" }
+            );
+            reqBody.photo = uploaded.secure_url;
+        }
         await userModel.updateOne(
             { email: email },
             { $set: reqBody },
@@ -125,6 +134,7 @@ exports.updateUserProfile = async (req, res) => {
         })
 
     } catch (e) {
+        console.log(e)
         return res.status(500).json({
             status: "fail",
             message: e,
