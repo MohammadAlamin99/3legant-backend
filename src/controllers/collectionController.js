@@ -1,3 +1,4 @@
+const cloudinary = require("../config/cloudinary");
 const collectionModel = require("../models/collectionModel")
 
 
@@ -12,12 +13,22 @@ exports.createCollection = async (req, res) => {
                 message: "Acess forbidden"
             })
         }
+        if (req.file) {
+            const fileBase64 = req.file.buffer.toString("base64");
+            const uploadResult = await cloudinary.uploader.upload(
+                `data:${req.file.mimetype};base64,${fileBase64}`,
+                { folder: "collections" }
+            );
+            reqBody.image = uploadResult.secure_url;
+        }
         const collection = await collectionModel.create(reqBody);
         return res.status(201).json({
             status: "success",
             message: "Collection created succcessfully",
+            data: collection,
         })
     } catch (e) {
+        console.log(e);
         return res.status(500).json({
             status: "fail",
             message: e
@@ -47,26 +58,36 @@ exports.getCollections = async (req, res) => {
 }
 
 // update collection by id
+
 exports.updateCollection = async (req, res) => {
     try {
         const id = req.params.id;
         const userRole = req.user.role;
+        const reqBody = req.body;
         if (userRole !== "admin") {
             return res.status(403).json({
                 status: "fail",
                 message: "Access forbidden",
             })
         }
-        const reqBody = req.body;
-        await collectionModel.findByIdAndUpdate(id, reqBody);
+        if (req.file && req.file.buffer) {
+            const fileBase64 = req.file.buffer.toString("base64");
+            const uploadResult = await cloudinary.uploader.upload(
+                `data:${req.file.mimetype};base64,${fileBase64}`,
+                { folder: "collections" }
+            );
+            reqBody.image = uploadResult.secure_url;
+        }
+        const result = await collectionModel.findByIdAndUpdate(id, reqBody, { new: true, runValidators: true, });
         return res.status(200).json({
             status: "success",
-            message: "Collection updated successfully"
+            message: "Collection updated successfully",
+            data: result
         })
     } catch (e) {
         return res.status(500).json({
             status: "fail",
-            messageL: "something went wrong"
+            message: "something went wrong"
         })
     }
 }

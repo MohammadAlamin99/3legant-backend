@@ -14,14 +14,14 @@ const bodyParser = require("body-parser");
 const upload = require("../middlewares/upload");
 
 // product routes
-router.post("/products", authorize(["customer"]), upload.fields([
+router.post("/products", authorize(["admin"]), upload.fields([
     { name: "images", maxCount: 10 },
     { name: "featureImage", maxCount: 1 },
     { name: "variantImages", maxCount: 10 },
 ]), productController.createProduct);
 
 router.get("/products", productController.getProducts);
-router.patch("/products/:id", authorize(["admin"]), productController.updateProduct);
+router.put("/products/:id", authorize(["admin"]), upload.array("images"), productController.updateProduct);
 router.delete("/products/:id", authorize(["admin"]), productController.deleteProduct);
 router.get("/product/:id", productController.getProductById);
 router.get("/products/collection", productController.getProductByCollectionId);
@@ -36,9 +36,9 @@ router.get("/auth/user/profile", authorize(["admin", "customer"]), userControlle
 router.put("/auth/user/profile", authorize(["admin", "customer"]), upload.single("photo"), userController.updateUserProfile);
 
 // collection routes
-router.post("/collection", authorize(["admin"]), collectionController.createCollection);
+router.post("/collection", authorize(["admin"]), upload.single("image"), collectionController.createCollection);
 router.get("/collection", collectionController.getCollections);
-router.patch("/collection/:id", authorize(["admin"]), collectionController.updateCollection);
+router.patch("/collection/:id", authorize(["admin"]), upload.single("image"), collectionController.updateCollection);
 router.delete("/collection/:id", authorize(["admin"]), collectionController.deleteCollection);
 
 // wishlist routes

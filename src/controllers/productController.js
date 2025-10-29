@@ -1,30 +1,23 @@
 const productModel = require("../models/productModel");
 const mongoose = require("mongoose");
 const cloudinary = require("../config/cloudinary");
+
 // Create Product
 exports.createProduct = async (req, res) => {
     try {
         const productData = req.body;
-
-        // Parse JSON string fields (important for Postman/form-data)
         const parseIfString = (field) => {
             if (typeof field === "string") return JSON.parse(field);
             return field;
         };
-
         productData.attributes = parseIfString(productData.attributes);
         productData.variants = parseIfString(productData.variants);
         productData.metafields = parseIfString(productData.metafields);
         productData.dimensions = parseIfString(productData.dimensions);
-
-        // Store uploaded URLs
         const images = [];
         let featureImageUrl = "";
         const variantImages = [];
-
-        // Handle file uploads (multer saves in req.files)
         if (req.files) {
-            // Handle product images (multiple)
             if (req.files["images"]) {
                 for (const file of req.files["images"]) {
                     const fileBuffer = file.buffer.toString("base64");
@@ -35,8 +28,6 @@ exports.createProduct = async (req, res) => {
                     images.push({ url: uploaded.secure_url, alt: file.originalname });
                 }
             }
-
-            // Handle single feature image
             if (req.files["featureImage"]) {
                 const file = req.files["featureImage"][0];
                 const fileBuffer = file.buffer.toString("base64");
@@ -47,7 +38,6 @@ exports.createProduct = async (req, res) => {
                 featureImageUrl = uploaded.secure_url;
             }
 
-            // Handle variant images (multiple, one per variant)
             if (req.files["variantImages"]) {
                 for (const file of req.files["variantImages"]) {
                     const fileBuffer = file.buffer.toString("base64");
@@ -60,19 +50,16 @@ exports.createProduct = async (req, res) => {
             }
         }
 
-        // Attach uploaded data
         if (images.length > 0) productData.images = images;
         if (featureImageUrl) productData.featureImage = featureImageUrl;
 
-        // Attach variant images if variant count matches uploaded files
         if (productData.variants && productData.variants.length > 0 && variantImages.length > 0) {
             productData.variants = productData.variants.map((variant, index) => ({
                 ...variant,
-                image: variantImages[index] || variant.image, // assign uploaded or existing URL
+                image: variantImages[index] || variant.image,
             }));
         }
 
-        // Save to database
         const product = await productModel.create(productData);
 
         return res.status(201).json({
@@ -89,7 +76,6 @@ exports.createProduct = async (req, res) => {
 };
 
 // get all products
-
 exports.getProducts = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -262,10 +248,30 @@ exports.updateProduct = async (req, res) => {
     try {
         let id = req.params.id;
         const updateData = req.body;
-        await productModel.findByIdAndUpdate(id, updateData);
+
+        if (req.files && req.files.length > 0) {
+            const uploadedImages = [];
+
+            for (const file of req.files) {
+                const fileBuffer = file.buffer.toString("base64");
+                const uploaded = await cloudinary.uploader.upload(
+                    `data:${file.mimetype};base64,${fileBuffer}`,
+                    { folder: "products" }
+                );
+                uploadedImages.push({ url: uploaded.secure_url });
+            }
+            updateData.images = uploadedImages;
+        }
+
+        const updatedProduct = await productModel.findByIdAndUpdate(
+            id,
+            { $set: updateData },
+            { new: true }
+        );
         return res.status(200).json({
             staus: "success",
-            message: "product updated successfully"
+            message: "product updated successfully",
+            data: updatedProduct,
         })
 
     } catch (e) {
