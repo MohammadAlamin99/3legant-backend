@@ -96,6 +96,7 @@ exports.userProfile = async (req, res) => {
 };
 
 // update profile
+
 exports.updateUserProfile = async (req, res) => {
   try {
     const email = req.user.email;
