@@ -248,7 +248,6 @@ exports.updateProduct = async (req, res) => {
     try {
         let id = req.params.id;
         const updateData = req.body;
-
         if (req.files && req.files.length > 0) {
             const uploadedImages = [];
 
