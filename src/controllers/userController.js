@@ -82,7 +82,7 @@ exports.userProfile = async (req, res) => {
     const email = req.user.email;
     const user = await userModel
       .findOne({ email: email })
-      .select("-password -_id -__v -createdAt -updatedAt");
+      .select("-password -__v -createdAt -updatedAt");
     return res.status(200).json({
       status: "success",
       data: user,
