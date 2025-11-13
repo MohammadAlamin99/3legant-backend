@@ -7,7 +7,7 @@ exports.createWishlist = async (req, res) => {
         const { userId, productId } = req.body;
         await wishlistModel.findOneAndUpdate(
             { userId },
-            { $set: { productId } },
+            { $addToSet: { productId } },
             { upsert: true }
         );
         return res.status(201).json({
