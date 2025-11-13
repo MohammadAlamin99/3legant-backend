@@ -42,8 +42,8 @@ router.patch("/collection/:id", authorize(["admin"]), upload.single("image"), co
 router.delete("/collection/:id", authorize(["admin"]), collectionController.deleteCollection);
 
 // wishlist routes
-router.post("/wishlist", authorize(["customer"]), wishlistController.createWishlist);
-router.get("/wishlist", authorize(["customer"]), wishlistController.getWishlist);
+router.post("/wishlist", authorize(["admin", "customer"]), wishlistController.createWishlist);
+router.get("/wishlist", authorize(["admin", "customer"]), wishlistController.getWishlist);
 
 // review routes
 router.post("/review", authorize(["customer"]), reviewController.createReview);
