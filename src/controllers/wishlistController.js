@@ -2,25 +2,95 @@ const wishlistModel = require("../models/wishlistModel");
 const mongoose = require("mongoose");
 
 // wishlist create
+// exports.createWishlist = async (req, res) => {
+//     try {
+//         const { userId, productId } = req.body;
+//         await wishlistModel.findOneAndUpdate(
+//             { userId },
+//             { $addToSet: { productId } },
+//             { upsert: true }
+//         );
+//         return res.status(201).json({
+//             status: "success",
+//             message: "Wishlist created successfully",
+//         });
+//     } catch (e) {
+//         return res.status(500).json({
+//             status: "fail",
+//             message: "Something went wrong"
+//         });
+//     }
+// };
+
 exports.createWishlist = async (req, res) => {
     try {
         const { userId, productId } = req.body;
+
+        // validate product id
+        if (!mongoose.Types.ObjectId.isValid(productId)) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Invalid productId"
+            });
+        }
+
+        let wishlist = await wishlistModel.findOne({ userId });
+
+        if (!wishlist) {
+            await wishlistModel.create({
+                userId,
+                productId: [productId]
+            });
+
+            return res.status(201).json({
+                status: "success",
+                message: "Wishlist created and product added"
+            });
+        }
+
+        const exists = wishlist.productId.includes(productId);
+
+        if (exists) {
+            wishlist = await wishlistModel.findOneAndUpdate(
+                { userId },
+                { $pull: { productId } },
+                { new: true }
+            );
+
+            if (wishlist.productId.length === 0) {
+                await wishlistModel.deleteOne({ userId });
+
+                return res.status(200).json({
+                    status: "success",
+                    message: "Product removed & wishlist deleted"
+                });
+            }
+
+            return res.status(200).json({
+                status: "success",
+                message: "Product removed"
+            });
+        }
+
         await wishlistModel.findOneAndUpdate(
             { userId },
-            { $addToSet: { productId } },
-            { upsert: true }
+            { $addToSet: { productId } }
         );
-        return res.status(201).json({
+
+        return res.status(200).json({
             status: "success",
-            message: "Wishlist created successfully",
+            message: "Product added"
         });
-    } catch (e) {
+
+    } catch (error) {
         return res.status(500).json({
             status: "fail",
-            message: "Something went wrong"
+            message: error.message
         });
     }
 };
+
+
 
 // wishlist get 
 exports.getWishlist = async (req, res) => {
